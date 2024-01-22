@@ -21,8 +21,18 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 import asyncio
 from pythoneda.shared.application import PythonEDA
+from pythoneda.shared.runtime.events.lifecycle.infrastructure.cli import DefUrlCli
+from pythoneda.shared.runtime.events.lifecycle.infrastructure.dbus import (
+    BootDbusSignalEmitter,
+)
+from pythoneda.shared.runtime.events.lifecycle.infrastructure.dbus import (
+    BootDbusSignalListener,
+)
 
 
+@enable(BootDbusSignalEmitter)
+@enable(BootDbusSignalListener)
+@enable(DefUrlCli)
 class BootApp(PythonEDA):
     """
     Runs PythonEDA Boot.
@@ -48,6 +58,17 @@ class BootApp(PythonEDA):
         except ImportError:
             banner = None
         super().__init__(banner, __file__)
+
+    async def accept_definition_url(self, url: str):
+        """
+        Annotates the url of the definition repository and generates
+        a BootRequested event.
+        :param url: Such url.
+        :type url: str
+        """
+        booted = Boot.listen_BootRequested(BootRequested(url))
+        if booted:
+            self.emit(booted)
 
 
 if __name__ == "__main__":
