@@ -20,6 +20,9 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 import asyncio
+from pythoneda.runtime.boot.events.lifecycle.infrastructure.dbus import (
+    DbusBootRequested,
+)
 from pythoneda.shared.application import PythonEDA
 from pythoneda.shared.runtime.events.lifecycle.infrastructure.cli import DefUrlCli
 from pythoneda.shared.runtime.events.lifecycle.infrastructure.dbus import (
@@ -31,7 +34,15 @@ from pythoneda.shared.runtime.events.lifecycle.infrastructure.dbus import (
 
 
 @enable(BootDbusSignalEmitter)
-@enable(BootDbusSignalListener)
+@enable(
+    BootDbusSignalListener,
+    events=[
+        {
+            "event-class": DbusBootRequested,
+            "bus-type": BusType.SYSTEM,
+        },
+    ],
+)
 @enable(DefUrlCli)
 class BootApp(PythonEDA):
     """
